@@ -1,0 +1,29 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Pobierz kod
+        uses: actions/checkout@v3
+      
+      - name: Podłącz SSH i wdróż
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          script: |
+            cd ~/todoapp
+            git pull origin main
+            npm install
+            docker stop mongodb || true
+            docker rm mongodb || true
+            docker run -d --name mongodb -p 27017:27017 mongo:6
+            pkill node || true
+            npm start

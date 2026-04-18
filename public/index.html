@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List - CRUD</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>To-Do List</h1>
+            <p>Zarządzaj swoimi zadaniami</p>
+        </div>
+
+        <div id="errorMsg" class="error"></div>
+        <div id="successMsg" class="success"></div>
+
+        <!-- Formularz logowania/rejestracji -->
+        <div id="authForm" class="auth-form">
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Hasło" required>
+            </div>
+            <button id="loginBtn">Zaloguj się</button>
+            <div class="toggle-link" id="showRegister">Nie masz konta? Zarejestruj się</div>
+        </div>
+
+        <!-- Aplikacja To-Do -->
+        <div id="todoApp" class="todo-app">
+            <div class="user-info">
+                <span>👤 <span id="userEmail"></span></span>
+                <button class="logout-btn" id="logoutBtn">Wyloguj</button>
+            </div>
+            <div class="add-todo">
+                <input type="text" id="newTask" placeholder="Dodaj nowe zadanie..." onkeypress="if(event.key==='Enter') addTodo()">
+                <button onclick="addTodo()">Dodaj</button>
+            </div>
+            <div id="todoList"></div>
+        </div>
+    </div>
+
+    <!-- Modal edycji -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edytuj zadanie</h3>
+            <textarea id="editTaskText" rows="3" placeholder="Treść zadania..."></textarea>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeModal()">Anuluj</button>
+                <button onclick="saveEdit()">Zapisz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
