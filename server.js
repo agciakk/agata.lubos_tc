@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 
@@ -44,13 +44,17 @@ app.post('/api/register', async (req, res) => {
   console.log('Rejestracja:', req.body);
   try {
     const { email, password } = req.body;
+    console.log('1. Hashowanie hasła...');
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('2. Hasło zahashowane');
     const user = new User({ email, password: hashedPassword });
+    console.log('3. Próba zapisu do bazy...');
     await user.save();
+    console.log('4. Zapisz się udał!');
     res.json({ success: true, message: 'Rejestracja udana!' });
   } catch (err) {
     console.error('Błąd rejestracji:', err);
-    res.status(400).json({ success: false, error: 'Email już istnieje' });
+    res.status(400).json({ success: false, error: 'Email już istnieje lub błąd bazy' });
   }
 });
 
