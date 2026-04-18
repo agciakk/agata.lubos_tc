@@ -21,9 +21,5 @@ jobs:
           script: |
             cd ~/todoapp
             git pull origin main
-            npm install
-            docker stop mongodb || true
-            docker rm mongodb || true
-            docker run -d --name mongodb -p 27017:27017 mongo:6
-            pkill node || true
-            npm start
+            docker-compose down
+            docker-compose up --build -d
