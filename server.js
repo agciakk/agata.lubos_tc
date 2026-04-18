@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static('public')); // Serwuje pliki HTML/CSS/JS
 
 const JWT_SECRET = 'twojTajnyKlucz123!';
-const MONGO_URL = 'mongodb://localhost:27017/todoapp';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/todoapp';
 
 // Schemat użytkownika
 const UserSchema = new mongoose.Schema({
