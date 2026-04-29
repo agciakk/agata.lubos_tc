@@ -88,25 +88,33 @@ async function loadTodos() {
 
 async function addTodo() {
     const task = document.getElementById('newTask').value;
+    const date = document.getElementById('taskDate').value;
+    const sendReminder = document.getElementById('sendReminder').checked;
+
     if (!task.trim()) return;
 
     try {
         const response = await fetch('/api/todos', {
             method: 'POST',
-            headers: {
+            headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentToken}`
             },
-            body: JSON.stringify({ task })
+            body: JSON.stringify({ 
+                task, 
+                dueDate: date || null, 
+                sendReminder 
+            })
         });
         const data = await response.json();
         if (data.success) {
             document.getElementById('newTask').value = '';
+            document.getElementById('taskDate').value = '';
+            document.getElementById('sendReminder').checked = false;
             loadTodos();
-            showSuccess('Zadanie dodane!');
         }
     } catch (err) {
-        showError('Błąd dodawania zadania');
+        showError('Błąd dodawania');
     }
 }
 
@@ -182,14 +190,28 @@ function displayTodos(todos) {
         return;
     }
 
-    todoList.innerHTML = todos.map(todo => `
-        <div class="todo-item ${todo.completed ? 'completed' : ''}">
-            <input type="checkbox" class="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo('${todo._id}', ${todo.completed})">
-            <span class="task-text">${escapeHtml(todo.task)}</span>
-            <button class="edit-btn" onclick="openEditModal('${todo._id}', '${escapeHtml(todo.task)}')">✏️ Edytuj</button>
-            <button class="delete-btn" onclick="deleteTodo('${todo._id}')">🗑 Usuń</button>
-        </div>
-    `).join('');
+    todoList.innerHTML = todos.map(todo => {
+        const dateDisplay = todo.dueDate 
+            ? new Date(todo.dueDate).toLocaleDateString('pl-PL') 
+            : 'Brak daty';
+        
+        return `
+            <div class="todo-item ${todo.completed ? 'completed' : ''}">
+                <input type="checkbox" class="checkbox" ${todo.completed ? 'checked' : ''} 
+                    onchange="toggleTodo('${todo._id}', ${todo.completed})">
+                <div class="task-info" style="flex: 1; margin-left: 10px;">
+                    <span class="task-text">${escapeHtml(todo.task)}</span>
+                    <small style="display:block; color:#666; font-size: 11px; margin-top: 4px;">
+                        📅 Termin: ${dateDisplay}
+                    </small>
+                </div>
+                <div class="todo-actions">
+                    <button class="edit-btn" onclick="openEditModal('${todo._id}', '${escapeHtml(todo.task)}', '${todo.dueDate || ''}')">✏️</button>
+                    <button class="delete-btn" onclick="deleteTodo('${todo._id}')">🗑</button>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function escapeHtml(text) {

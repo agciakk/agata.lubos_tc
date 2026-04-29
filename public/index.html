@@ -35,9 +35,10 @@
                 <button class="logout-btn" id="logoutBtn">Wyloguj</button>
             </div>
             <div class="add-todo">
-                <input type="text" id="newTask" placeholder="Dodaj nowe zadanie..." onkeypress="if(event.key==='Enter') addTodo()">
-                <button onclick="addTodo()">Dodaj</button>
-            </div>
+				<input type="text" id="newTask" placeholder="Dodaj nowe zadanie...">
+    	    	<input type="date" id="taskDate"> <button onclick="addTodo()">Dodaj</button>
+				<label><input type="checkbox" id="sendReminder"> Przypomnienie e-mail</label>
+	    </div>
             <div id="todoList"></div>
         </div>
     </div>
@@ -47,6 +48,7 @@
         <div class="modal-content">
             <h3>Edytuj zadanie</h3>
             <textarea id="editTaskText" rows="3" placeholder="Treść zadania..."></textarea>
+			<input type="date" id="editTaskDate">
             <div class="modal-buttons">
                 <button class="cancel-btn" onclick="closeModal()">Anuluj</button>
                 <button onclick="saveEdit()">Zapisz</button>

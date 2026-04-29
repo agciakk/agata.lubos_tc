@@ -21,7 +21,8 @@ const TodoSchema = new mongoose.Schema({
   email: String,
   task: String,
   completed: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  dueDate: { type: Date },      
+  sendReminder: { type: Boolean, default: false }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -72,14 +73,19 @@ app.post('/api/login', async (req, res) => {
 
 // API - Pobierz zadania
 app.get('/api/todos', authMiddleware, async (req, res) => {
-  const todos = await Todo.find({ email: req.user.email }).sort({ createdAt: -1 });
+  const todos = await Todo.find({ email: req.user.email }).sort({ dueDate: 1 });
   res.json(todos);
 });
 
 // API - Dodaj zadanie
 app.post('/api/todos', authMiddleware, async (req, res) => {
-  const { task } = req.body;
-  const todo = new Todo({ email: req.user.email, task });
+  const { task, dueDate, sendReminder } = req.body;
+  const todo = new Todo({
+	email: req.user.email, 
+    task, 
+    dueDate, 
+    sendReminder
+  });
   await todo.save();
   res.json({ success: true, todo });
 });
