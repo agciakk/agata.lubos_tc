@@ -148,9 +148,13 @@ async function deleteTodo(id) {
     }
 }
 
-function openEditModal(id, currentText) {
+function openEditModal(id, currentText, currentDate, currentReminder) {
     editingTodoId = id;
     document.getElementById('editTaskText').value = currentText;
+    document.getElementById('editTaskDate').value = currentDate 
+        ? new Date(currentDate).toISOString().split('T')[0] 
+        : '';
+    document.getElementById('editSendReminder').checked = currentReminder || false;
     document.getElementById('editModal').style.display = 'block';
 }
 
@@ -161,6 +165,9 @@ function closeModal() {
 
 async function saveEdit() {
     const newText = document.getElementById('editTaskText').value;
+    const newDate = document.getElementById('editTaskDate').value;
+    const newReminder = document.getElementById('editSendReminder').checked;
+
     if (!newText.trim()) {
         showError('Treść zadania nie może być pusta');
         return;
@@ -173,7 +180,11 @@ async function saveEdit() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentToken}`
             },
-            body: JSON.stringify({ task: newText })
+            body: JSON.stringify({ 
+                task: newText, 
+                dueDate: newDate || null,
+                sendReminder: newReminder
+            })
         });
         closeModal();
         loadTodos();
@@ -206,7 +217,7 @@ function displayTodos(todos) {
                     </small>
                 </div>
                 <div class="todo-actions">
-                    <button class="edit-btn" onclick="openEditModal('${todo._id}', '${escapeHtml(todo.task)}', '${todo.dueDate || ''}')">✏️</button>
+                    <button class="edit-btn" onclick="openEditModal('${todo._id}', '${escapeHtml(todo.task)}', '${todo.dueDate || ''}', ${todo.sendReminder || false})">✏️</button>
                     <button class="delete-btn" onclick="deleteTodo('${todo._id}')">🗑</button>
                 </div>
             </div>

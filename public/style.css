@@ -20,7 +20,9 @@ body {
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     width: 100%;
     max-width: 600px;
+	min-height: fit-content;
     overflow: hidden;
+	transition: all 0.3s ease;
 }
 
 .header {
@@ -86,8 +88,9 @@ button:hover {
 .add-todo {
     display: flex;
 	flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 15px;
+	padding 20px;
+    margin-bottom: 25px;
 }
 
 .add-todo label {
@@ -105,6 +108,18 @@ button:hover {
 
 .add-todo button {
     width: auto;
+}
+
+.add-todo input[type="text"] {
+	flex 1;
+    width: 100%;
+}
+
+.add-todo-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .todo-item {
@@ -134,8 +149,10 @@ button:hover {
 }
 
 #taskDate {
-    width: auto; 
-    flex: 0 1 150px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    flex: 1;
 }
 
 .checkbox {
@@ -231,6 +248,10 @@ button:hover {
     min-height: 100px;
 }
 
+.modal-content input[type="date"] {
+    margin-bottom: 15px;
+}
+
 .modal-buttons {
     display: flex;
     gap: 10px;
@@ -240,6 +261,23 @@ button:hover {
 .modal-buttons button {
     width: auto;
 }
+
+.reminder-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+}
+
+.reminder-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex: none;
+}
+
 
 .cancel-btn {
     background: #6c757d;

@@ -36,9 +36,14 @@
             </div>
             <div class="add-todo">
 				<input type="text" id="newTask" placeholder="Dodaj nowe zadanie...">
-    	    	<input type="date" id="taskDate"> <button onclick="addTodo()">Dodaj</button>
-				<label><input type="checkbox" id="sendReminder"> Przypomnienie e-mail</label>
-	    </div>
+    	    	<div class="add-todo-row">
+					<input type="date" id="taskDate">
+					<label style="font-size: 13px; display: flex; align-items: center; gap: 5px;">
+						<input type="checkbox" id="sendReminder"> Przypomnij
+					</label>
+					<button onclick="addTodo()" style="width: auto; padding: 10px 20px;">Dodaj</button>
+				</div>
+			</div>
             <div id="todoList"></div>
         </div>
     </div>
@@ -48,6 +53,9 @@
         <div class="modal-content">
             <h3>Edytuj zadanie</h3>
             <textarea id="editTaskText" rows="3" placeholder="Treść zadania..."></textarea>
+			<label class="reminder-label">
+				<input type="checkbox" id="editSendReminder"> Przypomnienie e-mail
+			</label>
 			<input type="date" id="editTaskDate">
             <div class="modal-buttons">
                 <button class="cancel-btn" onclick="closeModal()">Anuluj</button>

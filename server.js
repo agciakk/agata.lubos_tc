@@ -92,10 +92,12 @@ app.post('/api/todos', authMiddleware, async (req, res) => {
 
 // API - Aktualizuj zadanie
 app.put('/api/todos/:id', authMiddleware, async (req, res) => {
-  const { completed, task } = req.body;
+  const { completed, task, dueDate, sendReminder } = req.body; 
   const updateData = {};
   if (completed !== undefined) updateData.completed = completed;
   if (task !== undefined) updateData.task = task;
+  if (dueDate !== undefined) updateData.dueDate = dueDate;
+  if (sendReminder !== undefined) updateData.sendReminder = sendReminder; 
   
   await Todo.findOneAndUpdate(
     { _id: req.params.id, email: req.user.email },
