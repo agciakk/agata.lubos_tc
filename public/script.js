@@ -74,6 +74,27 @@ async function login() {
     }
 }
 
+function validateTaskForm(task, date, reminder) {
+    if (!task.trim()) {
+        showError('Treść zadania nie może być pusta');
+        return false;
+    }
+    if (date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selected = new Date(date);
+        if (selected < today) {
+            showError('Termin nie może być w przeszłości');
+            return false;
+        }
+    }
+    if (reminder && !date) {
+        showError('Przypomnienie wymaga ustawienia terminu');
+        return false;
+    }
+    return true;
+}
+
 async function loadTodos() {
     try {
         const response = await fetch('/api/todos', {
@@ -91,7 +112,7 @@ async function addTodo() {
     const date = document.getElementById('taskDate').value;
     const sendReminder = document.getElementById('sendReminder').checked;
 
-    if (!task.trim()) return;
+    if (!validateTaskForm(task, date, sendReminder)) return;
 
     try {
         const response = await fetch('/api/todos', {
@@ -160,7 +181,15 @@ function openEditModal(id, currentText, currentDate, currentReminder) {
 
 function closeModal() {
     document.getElementById('editModal').style.display = 'none';
+    document.getElementById('modalError').style.display = 'none';
     editingTodoId = null;
+}
+
+function showModalError(msg) {
+    const el = document.getElementById('modalError');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
 }
 
 async function saveEdit() {
@@ -169,7 +198,19 @@ async function saveEdit() {
     const newReminder = document.getElementById('editSendReminder').checked;
 
     if (!newText.trim()) {
-        showError('Treść zadania nie może być pusta');
+        showModalError('Treść zadania nie może być pusta');
+        return;
+    }
+    if (newDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (new Date(newDate) < today) {
+            showModalError('Termin nie może być w przeszłości');
+            return;
+        }
+    }
+    if (newReminder && !newDate) {
+        showModalError('Przypomnienie wymaga ustawienia terminu');
         return;
     }
 
