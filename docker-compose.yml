@@ -19,6 +19,19 @@ services:
     environment:
       - MONGO_URL=mongodb://mongodb:27017/todoapp
       - JWT_SECRET=twojTajnyKlucz123
+      - MAIL_SERVICE_URL=http://mail-service:5000
+    depends_on:
+      - mongodb
+      - mail-service
+
+  mail-service:
+    build: ./mail-service
+    container_name: todo-mail
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
     depends_on:
       - mongodb
 

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const MAIL_SERVICE_URL = process.env.MAIL_SERVICE_URL || 'http://localhost:5000';
 
 const app = express();
 app.use(express.json());
@@ -81,31 +82,73 @@ app.get('/api/todos', authMiddleware, async (req, res) => {
 app.post('/api/todos', authMiddleware, async (req, res) => {
   const { task, dueDate, sendReminder } = req.body;
   const todo = new Todo({
-	email: req.user.email, 
+    email: req.user.email, 
     task, 
     dueDate, 
     sendReminder
   });
   await todo.save();
+
+  if (sendReminder && dueDate) {
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    const isToday = taskDate.toDateString() === today.toDateString();
+    
+    if (isToday) {
+      fetch(`${MAIL_SERVICE_URL}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: req.user.email,
+          task,
+          dueDate
+        })
+      }).catch(err => console.error('Błąd serwisu mail:', err));
+    }
+  }
+
   res.json({ success: true, todo });
 });
 
 // API - Aktualizuj zadanie
 app.put('/api/todos/:id', authMiddleware, async (req, res) => {
-  const { completed, task, dueDate, sendReminder } = req.body; 
-  const updateData = {};
-  if (completed !== undefined) updateData.completed = completed;
-  if (task !== undefined) updateData.task = task;
-  if (dueDate !== undefined) updateData.dueDate = dueDate;
-  if (sendReminder !== undefined) updateData.sendReminder = sendReminder; 
+    const { completed, task, dueDate, sendReminder } = req.body; 
+    const updateData = {};
+    
+    if (completed !== undefined) updateData.completed = completed;
+    if (task !== undefined) updateData.task = task;
+    if (dueDate !== undefined) updateData.dueDate = new Date(dueDate); 
+    if (sendReminder !== undefined) updateData.sendReminder = sendReminder; 
   
-  await Todo.findOneAndUpdate(
-    { _id: req.params.id, email: req.user.email },
-    updateData
-  );
-  res.json({ success: true });
-});
+    try {
+        const updatedTodo = await Todo.findOneAndUpdate(
+            { _id: req.params.id, email: req.user.email },
+            { $set: updateData },
+            { new: true }
+        );
 
+        if (updatedTodo.sendReminder && updatedTodo.dueDate) {
+            const today = new Date();
+            const taskDate = new Date(updatedTodo.dueDate);
+            
+            if (taskDate.toDateString() === today.toDateString()) {
+                fetch(`${MAIL_SERVICE_URL}/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: req.user.email,
+                        task: updatedTodo.task,
+                        dueDate: taskDate.toLocaleDateString('pl-PL')
+                    })
+                }).catch(err => console.error('Błąd serwisu mail przy edycji:', err));
+            }
+        }
+
+        res.json({ success: true, todo: updatedTodo });
+    } catch (err) {
+        res.status(500).json({ error: 'Błąd aktualizacji' });
+    }
+});
 // API - Usuń zadanie
 app.delete('/api/todos/:id', authMiddleware, async (req, res) => {
   await Todo.findOneAndDelete({ _id: req.params.id, email: req.user.email });
