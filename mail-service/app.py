@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timezone
 import werkzeug.security
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='../public', static_url_path='')
 
 # Konfiguracja środowiskowa
 GMAIL_USER = os.environ.get('GMAIL_USER')
@@ -23,66 +23,8 @@ db = client['todoapp']
 
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
-# --- AUTH API ---
-
-@app.route('/api/register', methods=['POST'])
-def register():
-    data = request.json
-    email = data.get('email')
-    password = data.get('password')
-    
-    if db.users.find_one({'email': email}):
-        return jsonify({'success': False, 'error': 'Email już istnieje'}), 400
-    
-    hashed_pw = werkzeug.security.generate_password_hash(password)
-    db.users.insert_one({'email': email, 'password': hashed_pw})
-    return jsonify({'success': True})
-
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.json
-    user = db.users.find_one({'email': data.get('email')})
-    
-    if user and werkzeug.security.check_password_hash(user['password'], data.get('password')):
-        return jsonify({'success': True, 'token': 'fake-jwt-token', 'email': user['email']})
-    
-    return jsonify({'success': False, 'error': 'Nieprawidłowe dane logowania'}), 401
-
-# --- TODOS API ---
-
-@app.route('/api/todos', methods=['GET'])
-def get_todos():
-    todos = list(db.todos.find())
-    for t in todos:
-        t['_id'] = str(t['_id'])
-    return jsonify(todos)
-
-@app.route('/api/todos', methods=['POST'])
-def add_todo():
-    data = request.json
-    new_todo = {
-        'task': data.get('task'),
-        'dueDate': data.get('dueDate'),
-        'sendReminder': data.get('sendReminder'),
-        'completed': False,
-        'email': 'test@gmail.com'
-    }
-    result = db.todos.insert_one(new_todo)
-    return jsonify({'success': True, 'id': str(result.inserted_id)})
-
-@app.route('/api/todos/<id>', methods=['PUT'])
-def update_todo(id):
-    data = request.json
-    db.todos.update_one({'_id': ObjectId(id)}, {'$set': data})
-    return jsonify({'success': True})
-
-@app.route('/api/todos/<id>', methods=['DELETE'])
-def delete_todo(id):
-    db.todos.delete_one({'_id': ObjectId(id)})
-    return jsonify({'success': True})
-    
 def send_bulk_mail(to, subject, body):
     try:
         msg = MIMEMultipart()
@@ -169,7 +111,7 @@ def run_scheduler():
         schedule.run_pending()
         time.sleep(60)
 
-@app.route('/send', methods=['POST'])
+@app.route('/api/send', methods=['POST'])
 def api_send_email():
     data = request.json
     to = data.get('to')
@@ -185,7 +127,6 @@ def api_send_email():
     success = send_bulk_mail(to, subject, body)
     return jsonify({'success': success})
 
-# Ręczne wywołane raportu dziennego
 @app.route('/test-reminders', methods=['GET'])
 def force_test_reminders():
     try:

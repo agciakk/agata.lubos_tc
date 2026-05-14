@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flask pymongo schedule pytest pytest-mock
       - name: Testy Jednostkowe (Pytest)
-        run: pytest mail-service\test_unit.py
+        run: pytest
       - name: Testy Jednostkowe JS (Jest)
         run: |
           npm install
@@ -32,7 +32,8 @@ jobs:
       - name: Testy E2E Cypress
         uses: cypress-io/github-action@v7
         with:
-          start: python app.py
+          install-command: npm install
+          start: python mail-service/app.py
           wait-on: 'http://localhost:5000'
         env:
           GMAIL_USER: test@gmail.com
