@@ -1,37 +1,101 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pymongo import MongoClient
 import os
+from bson import ObjectId
 import threading
 import schedule
 import time
 from datetime import datetime, timezone
+import werkzeug.security
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 
 # Konfiguracja środowiskowa
 GMAIL_USER = os.environ.get('GMAIL_USER')
 GMAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://mongodb:27017/todoapp')
 
+client = MongoClient(MONGO_URL)
+db = client['todoapp']
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+# --- AUTH API ---
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    
+    if db.users.find_one({'email': email}):
+        return jsonify({'success': False, 'error': 'Email już istnieje'}), 400
+    
+    hashed_pw = werkzeug.security.generate_password_hash(password)
+    db.users.insert_one({'email': email, 'password': hashed_pw})
+    return jsonify({'success': True})
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    user = db.users.find_one({'email': data.get('email')})
+    
+    if user and werkzeug.security.check_password_hash(user['password'], data.get('password')):
+        return jsonify({'success': True, 'token': 'fake-jwt-token', 'email': user['email']})
+    
+    return jsonify({'success': False, 'error': 'Nieprawidłowe dane logowania'}), 401
+
+# --- TODOS API ---
+
+@app.route('/api/todos', methods=['GET'])
+def get_todos():
+    todos = list(db.todos.find())
+    for t in todos:
+        t['_id'] = str(t['_id'])
+    return jsonify(todos)
+
+@app.route('/api/todos', methods=['POST'])
+def add_todo():
+    data = request.json
+    new_todo = {
+        'task': data.get('task'),
+        'dueDate': data.get('dueDate'),
+        'sendReminder': data.get('sendReminder'),
+        'completed': False,
+        'email': 'test@gmail.com'
+    }
+    result = db.todos.insert_one(new_todo)
+    return jsonify({'success': True, 'id': str(result.inserted_id)})
+
+@app.route('/api/todos/<id>', methods=['PUT'])
+def update_todo(id):
+    data = request.json
+    db.todos.update_one({'_id': ObjectId(id)}, {'$set': data})
+    return jsonify({'success': True})
+
+@app.route('/api/todos/<id>', methods=['DELETE'])
+def delete_todo(id):
+    db.todos.delete_one({'_id': ObjectId(id)})
+    return jsonify({'success': True})
+    
 def send_bulk_mail(to, subject, body):
     try:
         msg = MIMEMultipart()
         msg['From'] = GMAIL_USER
         msg['To'] = to
         msg['Subject'] = subject
-        
         msg.attach(MIMEText(body, 'plain'))
-        
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(GMAIL_USER, GMAIL_PASSWORD)
             server.sendmail(GMAIL_USER, to, msg.as_string())
-        print(f'Mail wysłany do {to}: {subject}')
         return True
     except Exception as e:
-        print(f'Błąd wysyłania do {to}: {e}')
+        print(f'Błąd maila: {e}')
         return False
 
 def check_and_send_reminders():
