@@ -1,0 +1,22 @@
+{
+  "name": "todo-app-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": ["**/*.test.js"],
+    "globals": {
+      "currentToken": null,
+      "currentEmail": null,
+      "editingTodoId": null
+    },
+    "setupFiles": ["./jest.setup.js"]
+  }
+}
