@@ -117,7 +117,7 @@ app.post('/api/todos', authMiddleware, async (req, res) => {
     if (isToday) {
       if (process.env.NODE_ENV !== 'test') {
 			try {
-				await fetch(`${MAIL_SERVICE_URL}/api/send` {
+				await fetch(`${MAIL_SERVICE_URL}/api/send`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
