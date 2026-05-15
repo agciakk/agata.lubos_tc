@@ -142,11 +142,10 @@ def force_test_reminders():
         return jsonify({'success': False, 'error': str(e)}), 500
     
 if __name__ == '__main__':
-    FLASK_PORT = int(os.environ.get('FLASK_PORT', 5000))
     # Uruchomienie harmonogramu w tle
     t = threading.Thread(target=run_scheduler, daemon=True)
     t.start()
     
     # Uruchomienie serwera Flask
-    app.run(host='0.0.0.0', port=FLASK_PORT)
+    app.run(host='0.0.0.0', port=5000)
 
