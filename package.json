@@ -32,6 +32,14 @@
         "testMatch": [
           "**/server.test.js"
         ]
+      },
+	  {
+        "displayName": "e2e",
+        "testEnvironment": "node",
+		"testTimeout": 30000,
+        "testMatch": [
+          "**/server_e2e.test.js"
+        ]
       }
     ]
   },

@@ -227,7 +227,7 @@ async function saveEdit() {
     const task = document.getElementById('editTaskText').value;
     const date = document.getElementById('editTaskDate').value;
     const sendReminder = document.getElementById('editSendReminder').checked;
-
+	
     if (!validateTaskForm(task, date, sendReminder)) return;
 
     try {

@@ -55,6 +55,12 @@ jobs:
           password: ${{ secrets.AZURE_VM_PASSWORD }}
           script: |
             cd ~/todoapp
+            
+            cat > .env <<EOF
+            GMAIL_USER=${{ secrets.GMAIL_USER }}
+            GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}
+            EOF
+            
             git pull origin master
             docker-compose down
             docker-compose build --no-cache

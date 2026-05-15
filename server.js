@@ -115,15 +115,19 @@ app.post('/api/todos', authMiddleware, async (req, res) => {
     const isToday = taskDate.toDateString() === today.toDateString();
     
     if (isToday) {
-      fetch(`${MAIL_SERVICE_URL}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: req.user.email,
-          task,
-          dueDate
-        })
-      }).catch(err => console.error('Błąd serwisu mail:', err));
+      if (process.env.NODE_ENV !== 'test') {
+			try {
+				await fetch(`${MAIL_SERVICE_URL}/send`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(data)
+				});
+			} catch (err) {
+				console.error('Mail service error:', err.message);
+			}
+		}
     }
   }
 
