@@ -10,8 +10,11 @@ import schedule
 import time
 from datetime import datetime, timezone
 import werkzeug.security
+from flask_cors import CORS
 
 app = Flask(__name__, static_folder='../public', static_url_path='')
+
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 # Konfiguracja środowiskowa
 GMAIL_USER = os.environ.get('GMAIL_USER')

@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flask pymongo schedule pytest pytest-mock
+          pip install flask flask-cors==5.0.0 pymongo schedule pytest pytest-mock
       - name: Testy Jednostkowe (Pytest)
         run: pytest
       - name: Testy Jednostkowe JS (Jest)
@@ -38,6 +38,7 @@ jobs:
           GMAIL_USER: test@gmail.com
           GMAIL_PASSWORD: fake_password
           MONGO_URL: mongodb://localhost:27017/todoapp
+          JWT_SECRET: test_secret_key
           
   deploy:
     needs: test

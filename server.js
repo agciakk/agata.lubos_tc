@@ -117,7 +117,7 @@ app.post('/api/todos', authMiddleware, async (req, res) => {
     if (isToday) {
       if (process.env.NODE_ENV !== 'test') {
 			try {
-				await fetch(`${MAIL_SERVICE_URL}/send`, {
+				await fetch(`${MAIL_SERVICE_URL}/api/send` {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -156,7 +156,7 @@ app.put('/api/todos/:id', authMiddleware, async (req, res) => {
             const taskDate = new Date(updatedTodo.dueDate);
             
             if (taskDate.toDateString() === today.toDateString()) {
-                fetch(`${MAIL_SERVICE_URL}/send`, {
+               fetch(`${MAIL_SERVICE_URL}/api/send`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
