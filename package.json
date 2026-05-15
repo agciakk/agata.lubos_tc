@@ -5,13 +5,37 @@
     "test": "jest --coverage"
   },
   "devDependencies": {
-	"cypress": "^13.0.0",
+    "bcryptjs": "^3.0.3",
+    "cypress": "^13.17.0",
     "jest": "^29.0.0",
-    "jest-environment-jsdom": "^29.0.0"
+    "jest-environment-jsdom": "^29.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb-memory-server": "^11.1.0",
+    "mongoose": "^9.6.2",
+    "supertest": "^7.2.2"
   },
   "jest": {
-    "testEnvironment": "jsdom",
-    "testMatch": ["**/public/**/*.test.js"], 
-    "setupFiles": ["./public/jest.setup.js"]
+    "projects": [
+      {
+        "displayName": "frontend",
+        "testEnvironment": "jsdom",
+        "testMatch": [
+          "**/public/**/*.test.js"
+        ],
+        "setupFiles": [
+          "./public/jest.setup.js"
+        ]
+      },
+      {
+        "displayName": "backend",
+        "testEnvironment": "node",
+        "testMatch": [
+          "**/server.test.js"
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }

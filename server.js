@@ -32,11 +32,16 @@ const Todo = mongoose.model('Todo', TodoSchema);
 // Middleware
 function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
+  console.log('Auth header:', req.headers.authorization);
+  console.log('Token:', token);
+  
   if (!token) return res.status(401).json({ error: 'Brak tokena' });
   try {
     req.user = jwt.verify(token, JWT_SECRET);
+    console.log('User verified:', req.user);
     next();
-  } catch {
+  } catch (err) {
+    console.log('Token verification error:', err.message);
     res.status(401).json({ error: 'Nieprawidłowy token' });
   }
 }
@@ -46,17 +51,32 @@ app.post('/api/register', async (req, res) => {
   console.log('Rejestracja:', req.body);
   try {
     const { email, password } = req.body;
+    
+    // Walidacja wejścia
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Email i hasło są wymagane' });
+    }
+    
+    // Sprawdź czy użytkownik już istnieje
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log('Użytkownik już istnieje:', email);
+      return res.status(400).json({ success: false, error: 'Email już istnieje' });
+    }
+    
     console.log('1. Hashowanie hasła...');
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('2. Hasło zahashowane');
+    
     const user = new User({ email, password: hashedPassword });
     console.log('3. Próba zapisu do bazy...');
     await user.save();
-    console.log('4. Zapisz się udał!');
+    console.log('4. Zapisało się!');
+    
     res.json({ success: true, message: 'Rejestracja udana!' });
   } catch (err) {
-    console.error('Błąd rejestracji:', err);
-    res.status(400).json({ success: false, error: 'Email już istnieje lub błąd bazy' });
+    console.error('BŁĄD REJESTRACJI:', err);
+    res.status(500).json({ success: false, error: err.message || 'Błąd serwera' });
   }
 });
 
@@ -156,11 +176,15 @@ app.delete('/api/todos/:id', authMiddleware, async (req, res) => {
 });
 
 // Uruchom serwer
-mongoose.connect(MONGO_URL).then(() => {
-  console.log('Połączono z MongoDB');
-  app.listen(3000, '0.0.0.0', () => {
-    console.log('Serwer działa na http://localhost:3000');
+if (require.main === module) {
+  mongoose.connect(MONGO_URL).then(() => {
+    console.log('Połączono z MongoDB');
+    app.listen(3000, '0.0.0.0', () => {
+      console.log('Serwer działa na http://localhost:3000');
+    });
+  }).catch(err => {
+    console.error('Błąd MongoDB:', err);
   });
-}).catch(err => {
-  console.error('Błąd MongoDB:', err);
-});
+}
+
+module.exports = app;

@@ -32,9 +32,8 @@ jobs:
       - name: Testy E2E Cypress
         uses: cypress-io/github-action@v7
         with:
-          install-command: npm install
-          start: python mail-service/app.py
-          wait-on: 'http://localhost:5000'
+          start: python mail-service/app.py & node server.js
+          wait-on: 'http://localhost:3000'
         env:
           GMAIL_USER: test@gmail.com
           GMAIL_PASSWORD: fake_password
