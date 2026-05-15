@@ -32,7 +32,7 @@ jobs:
       - name: Testy E2E Cypress
         uses: cypress-io/github-action@v7
         with:
-          start: python mail-service/app.py & node server.js
+          start: node server.js & python mail-service/app.py 
           wait-on: 'http://localhost:3000, http://localhost:5000'
         env:
           GMAIL_USER: test@gmail.com
